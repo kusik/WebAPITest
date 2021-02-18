@@ -7,6 +7,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -24,15 +25,14 @@ namespace WebAPI.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            string query = @"select * from dbo.department";
-            DataTable dataTable = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
-            SqlDataReader sqlDataReader;
-            using (SqlConnection sqlConnection = new SqlConnection(sqlDataSource))
+            var query = @"select * from dbo.department";
+            var dataTable = new DataTable();
+            var sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
+            using (var sqlConnection = new SqlConnection(sqlDataSource))
             {
                 sqlConnection.Open();
-                using SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
-                sqlDataReader = sqlCommand.ExecuteReader();
+                using var sqlCommand = new SqlCommand(query, sqlConnection);
+                var sqlDataReader = sqlCommand.ExecuteReader();
                 dataTable.Load(sqlDataReader);
                 sqlDataReader.Close();
                 sqlConnection.Close();
@@ -40,23 +40,50 @@ namespace WebAPI.Controllers
             return new JsonResult(dataTable);
         }
         [HttpPost]
-        public JsonResult Post()
+        public JsonResult Post(Department dep)
         {
 
-            string query = @"select * from dbo.department";
-            DataTable dataTable = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
-            SqlDataReader sqlDataReader;
-            using (SqlConnection sqlConnection = new SqlConnection(sqlDataSource))
+            var query = @"insert into  dbo.department values('" + dep.DepartmentName + @"')";
+            var sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
+            using (var sqlConnection = new SqlConnection(sqlDataSource))
             {
-                sqlConnection.Open ();
-                using SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
-                sqlDataReader = sqlCommand.ExecuteReader();
-                dataTable.Load(sqlDataReader);
-                sqlDataReader.Close();
+                sqlConnection.Open();
+                using var sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.ExecuteReader();
                 sqlConnection.Close();
             }
-            return new JsonResult(dataTable);
+            return new JsonResult("Added Successfully");
+        }
+
+        [HttpPut]
+        public JsonResult Put(Department dep)
+        {
+
+            var query = @"update  dbo.department set DepartmentName ='" + dep.DepartmentName + @"' where DepartmentId ='" + dep.DepartmentId + @"'";
+            var sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
+            using (var sqlConnection = new SqlConnection(sqlDataSource))
+            {
+                sqlConnection.Open();
+                using var sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.ExecuteReader();
+                sqlConnection.Close();
+            }
+            return new JsonResult("Update Successfully");
+        }
+        [HttpDelete]
+        public JsonResult Delete(int depId)
+        {
+
+            var query = @"delete from dbo.department where DepartmentId ='" + depId + @"'";
+            var sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
+            using (var sqlConnection = new SqlConnection(sqlDataSource))
+            {
+                sqlConnection.Open();
+                using var sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.ExecuteReader();
+                sqlConnection.Close();
+            }
+            return new JsonResult("Delete Successfully");
         }
 
     }
